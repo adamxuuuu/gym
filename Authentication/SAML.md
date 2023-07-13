@@ -1,1 +1,0 @@
-![saml auth flow](./image/saml-auth.png)
