@@ -85,25 +85,25 @@ msgs = StreamlitChatMessageHistory()
 #     memory_key="chat_history", chat_memory=msgs, return_messages=True)
 
 # TODO: Change the following code to RESTful and call the endpoint /v1/completion
-# llm = LlamaCpp(
-#     model_path="/workspace/gym/vbot/models/LLaMa-7B-GGML/llama-7b.ggmlv3.q4_1.bin",
-#     temperature=0,
-#     n_ctx = 2048,
-#     streaming = True,
-#     stop=['\n','\n\n','###']
-# )
-
-openai_api_key = "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"
-llm = ChatOpenAI(
-    model_name="gpt-3.5-turbo",
-    openai_api_key=openai_api_key,
+llm = LlamaCpp(
+    model_path="/workspace/gym/vbot/models/LLaMa-7B-GGML/llama-7b.ggmlv3.q4_1.bin",
     temperature=0,
-    max_tokens=256,
-    model_kwargs={'presence_penalty': 1,
-                  'frequency_penalty': 1,
-                  'stop': ['\n', '\n\n', '###']},
-    streaming=True
+    n_ctx=2048,
+    streaming=True,
+    # stop=['\n','\n\n','###']
 )
+
+# openai_api_key = "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"
+# llm = ChatOpenAI(
+#     model_name="gpt-3.5-turbo",
+#     openai_api_key=openai_api_key,
+#     temperature=0,
+#     max_tokens=256,
+#     model_kwargs={'presence_penalty': 1,
+#                   'frequency_penalty': 1,
+#                   'stop': ['\n', '\n\n', '###']},
+#     streaming=True
+# )
 
 chain_type_kwargs = {"prompt": PROMPT}
 qa_chain = RetrievalQA.from_chain_type(
