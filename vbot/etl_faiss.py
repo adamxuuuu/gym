@@ -9,16 +9,23 @@ from langchain.embeddings import HuggingFaceEmbeddings
 
 from config import (
     DIMENSION,
-    EMBEDDING_MODEL
+    EMBEDDING_MODEL,
+    CHUNK_OVERLAP,
+    CHUNK_SIZE,
+    SEPARATORS
 )
 
 
 embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=100)
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=CHUNK_SIZE, 
+    chunk_overlap=CHUNK_OVERLAP,
+    separators=SEPARATORS
+)
+
 # Get all the text files in the text directory
-docs = []
-po_path = './data/policies'
 def load_from_dir(dir_path):
+    docs = []
     for file in tqdm(os.listdir(dir_path)):
         doc = load_single(os.path.join(dir_path, file))
         if doc:
@@ -32,23 +39,23 @@ def load_single(file_path):
         chunks = text_splitter.split_documents(docs)
         return chunks
     except Exception as e:
-        print(file_path, end='')
+        # print(file_path, end='')
+        pass
 
 def _file_name(path):
     return os.path.basename(path).replace('_', ' ')
 
-def save_local():
-    print(f'Extract and Transform documents from {po_path}...')
-    policies = load_from_dir(po_path)
-    print(f'Embedding document chunks...')
+def save_local(path: str):
+    docs = load_from_dir(path)
     vector_db = FAISS.from_documents(
-        policies,
-        embeddings
+        documents=docs,
+        embedding=embeddings,
+        normalize_L2=True
     )
-    vector_db.save_local('./faiss')
+    vector_db.save_local(f'./faiss/c_{CHUNK_SIZE}')
 
 if __name__ == '__main__':
-    # save_local()
-    vector_db = FAISS.load_local('./faiss', embeddings)
-    hits = vector_db.search('environment friendly policy', search_type='mmr', k=5)
-    pprint.pprint(hits)
+    save_local('./data/policies')
+    # vector_db = FAISS.load_local('./faiss', embeddings)
+    # hits = vector_db.search('environment friendly policy', search_type='mmr', k=5)
+    # pprint.pprint(hits)
