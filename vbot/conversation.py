@@ -8,9 +8,8 @@ from langchain.memory.chat_message_histories import StreamlitChatMessageHistory
 
 
 llm = LlamaCpp(
-    model_path="/workspace/gym/vbot/models/LLaMa-7B-GGML/llama-7b.ggmlv3.q4_1.bin",
+    model_path="/workspace/gym/vbot/models/llama-2-13b-chat.ggmlv3.q4_1.bin",
     temperature=0.8,
-    n_ctx = 2048,
     streaming = True,
     stop=[]
 )

@@ -6,19 +6,20 @@ from langchain import PromptTemplate
 from langchain.vectorstores import FAISS
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.chains import ConversationalRetrievalChain, RetrievalQA
-from langchain.llms import LlamaCpp
+from langchain.llms import LlamaCpp, CTransformers
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
 from langchain.callbacks.base import BaseCallbackHandler
 from langchain.callbacks import StreamlitCallbackHandler
-from langchain.memory import ConversationBufferMemory
 from langchain.memory.chat_message_histories import StreamlitChatMessageHistory
 
 from config import (
-    SEARCH_PARAMS,
     EMBEDDING_MODEL,
     PROMPT_TEMPLATE,
-    LLM
+    LLM_13B,
+    LLM_7B,
+    SEARCH_KWARGS,
+    SEARCH_TYPE
 )
 
 PROMPT = PromptTemplate(
@@ -28,24 +29,22 @@ PROMPT = PromptTemplate(
 
 logo = Image.open('./image/logo.png')
 
-# Define retriever
-
-
 @st.cache_resource()
-def retriever():
+def retriever(db_path: str):
     # Load Embedding model from local path
     # Load data from FAISS database to front end
     # TODO: Change the EMBEDDING_MODEL to local path
     embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
 
     vector_db = FAISS.load_local(
-        './faiss',
-        embeddings
+        folder_path=db_path,
+        embeddings=embeddings,
+        normalize_L2=True,
     )
 
     retriever = vector_db.as_retriever(
-        search_type="mmr",
-        search_kwargs={'k': 4, 'lambda_mult': 1}
+        search_type=SEARCH_TYPE,
+        search_kwargs=SEARCH_KWARGS
     )
 
     return retriever
@@ -71,6 +70,7 @@ class PrintRetrievalHandler(BaseCallbackHandler):
     def on_retriever_end(self, documents, **kwargs):
         # self.container.write(documents)
         for idx, doc in enumerate(documents):
+            pprint(doc.metadata)
             source = os.path.basename(doc.metadata["source"])
             self.container.write(f"**Document {idx} from {source}**")
             self.container.markdown(doc.page_content)
@@ -87,11 +87,12 @@ msgs = StreamlitChatMessageHistory()
 
 # TODO: Change the following code to RESTful and call the endpoint /v1/completion
 llm = LlamaCpp(
-    model_path=LLM,
+    model_path=LLM_7B,
     temperature=0,
     n_ctx=2048,
     streaming=True,
-    stop=['\n','\n\n','###']
+    max_tokens=512
+    # stop=['\n','\n\n']
 )
 
 # llm = ChatOpenAI(
@@ -109,16 +110,21 @@ chain_type_kwargs = {"prompt": PROMPT}
 qa_chain = RetrievalQA.from_chain_type(
     llm=llm,
     chain_type="stuff",
-    retriever=retriever(),
+    retriever=retriever('./faiss/c_1024'),
     chain_type_kwargs=chain_type_kwargs
 )
 
 # Sidebar
+with st.sidebar:
+    st.info("""Here are some tips when using the system\n
+    1. Please use natural language to ask the bot
+    """)
+
 if st.sidebar.button("Clear message history"):
     msgs.clear()
     msgs.add_ai_message("How can I help you?")
 
-avatars = {"human": "user", "ai": "assistant"}
+avatars = {"human": "😊", "ai": "🐱‍👤"}
 for msg in msgs.messages:
     st.chat_message(avatars[msg.type]).write(msg.content)
 
@@ -129,8 +135,9 @@ if user_query := st.chat_input(placeholder="Ask me about VW policy, compliance a
         retrieval_handler = PrintRetrievalHandler(st.container())
         stream_handler = StreamHandler(st.empty())
 
-        print(f'Start processing query: {user_query}')
+        pprint(f'Start processing query: {user_query}')
+        pprint(qa_chain.dict)
         response = qa_chain.run(user_query, callbacks=[
                                 retrieval_handler, stream_handler])
 
-        pprint(response)
+        pprint(f'Finish generation: {response}')
