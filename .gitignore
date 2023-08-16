@@ -160,10 +160,8 @@ cython_debug/
 #.idea/
 
 # Project related
-vbot/data/
-vbot/volumes/
-vbot/models/
-vbot/wanding/
+vbot/data/*
+vbot/models/*
 vbot/milvus/
 llama-cpp/*
 obsutil/

@@ -14,12 +14,13 @@ from langchain.callbacks import StreamlitCallbackHandler
 from langchain.memory.chat_message_histories import StreamlitChatMessageHistory
 
 from config import (
-    EMBEDDING_MODEL,
+    EMBEDDING,
     PROMPT_TEMPLATE,
     LLM_13B,
     LLM_7B,
     SEARCH_KWARGS,
-    SEARCH_TYPE
+    SEARCH_TYPE,
+    CHUNK_SIZE
 )
 
 PROMPT = PromptTemplate(
@@ -34,7 +35,7 @@ def retriever(db_path: str):
     # Load Embedding model from local path
     # Load data from FAISS database to front end
     # TODO: Change the EMBEDDING_MODEL to local path
-    embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
+    embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING)
 
     vector_db = FAISS.load_local(
         folder_path=db_path,
@@ -89,7 +90,7 @@ msgs = StreamlitChatMessageHistory()
 llm = LlamaCpp(
     model_path=LLM_7B,
     temperature=0,
-    n_ctx=2048,
+    n_ctx=4000,
     streaming=True,
     max_tokens=512
     # stop=['\n','\n\n']
@@ -107,10 +108,11 @@ llm = LlamaCpp(
 # )
 
 chain_type_kwargs = {"prompt": PROMPT}
+model_base = os.path.basename(EMBEDDING)
 qa_chain = RetrievalQA.from_chain_type(
     llm=llm,
     chain_type="stuff",
-    retriever=retriever('./faiss/c_1024'),
+    retriever=retriever(f'./faiss/cs{CHUNK_SIZE}/{model_base}'),
     chain_type_kwargs=chain_type_kwargs
 )
 
@@ -135,8 +137,7 @@ if user_query := st.chat_input(placeholder="Ask me about VW policy, compliance a
         retrieval_handler = PrintRetrievalHandler(st.container())
         stream_handler = StreamHandler(st.empty())
 
-        pprint(f'Start processing query: {user_query}')
-        pprint(qa_chain.dict)
+        pprint(f'Start processing query: "{user_query}"')
         response = qa_chain.run(user_query, callbacks=[
                                 retrieval_handler, stream_handler])
 
