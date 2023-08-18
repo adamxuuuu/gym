@@ -1,5 +1,5 @@
 # DB Config
-DB_BASE = './faiss/'
+DB_BASE = '/workspace/gym/vbot/faiss'
 
 # Text Embeddings
 EMBEDDING = './models/multi-qa-mpnet-base-cos-v1'       # Slowest
@@ -8,8 +8,8 @@ EMBEDDING = './models/multi-qa-mpnet-base-cos-v1'       # Slowest
 SEPARATORS = '\n{1,}'       #   How the splitter split text, will still try to fill the CHUNK_SIZE requirment
 
 # LLM Models
-LLM_13B = "./models/llama-2-13b-chat.ggmlv3.q4_1.bin"   # Slow
-LLM_7B = "./models/llama-2-7b-chat.ggmlv3.q8_0.bin"     # Fast
+LLM_13B = "/workspace/gym/vbot/models/llama-2-13b-chat.ggmlv3.q4_1.bin"   # Slow
+LLM_7B = "/workspace/gym/vbot/models/llama-2-7b-chat.ggmlv3.q8_0.bin"     # Fast
 
 # Text chunking
 CHUNK_SIZE = 2048           #  [64, 128, 256, 512, 1024, 2048]

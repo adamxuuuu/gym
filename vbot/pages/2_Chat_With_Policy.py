@@ -80,14 +80,12 @@ msgs = StreamlitChatMessageHistory()
 # memory = ConversationBufferMemory(
 #     memory_key="chat_history", chat_memory=msgs, return_messages=True)
 
-# TODO: Change the following code to RESTful and call the endpoint /v1/completion
 llm = LlamaCpp(
     model_path=LLM_7B,
     temperature=0.01,
     n_ctx=2048,
     streaming=True,
     max_tokens=512
-    # stop=["\n","\n\n"]
 )
 
 # llm = ChatOpenAI(
@@ -112,7 +110,7 @@ qa_chain = RetrievalQA.from_chain_type(
 
 # Sidebar
 with st.sidebar:
-    if st.sidebar.button("Clear message history"):
+    if st.sidebar.button("Clear message history") and not msgs:
         msgs.clear()
         msgs.add_ai_message("How can I help you?")
 
@@ -120,7 +118,7 @@ avatars = {"human": "user", "ai": "assistant"}
 for msg in msgs.messages:
     st.chat_message(avatars[msg.type]).write(msg.content)
 
-if user_query := st.chat_input(placeholder="Ask me about VW policy, compliance and everything else!"):
+if user_query := st.chat_input(placeholder="Ask me about VW policy related question."):
     st.chat_message("user").write(user_query)
 
     with st.chat_message("assistant"):
