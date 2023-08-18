@@ -106,14 +106,12 @@ model_base = os.path.basename(EMBEDDING)
 qa_chain = RetrievalQA.from_chain_type(
     llm=llm,
     chain_type="stuff",
-    retriever=retriever(f"./vbot/faiss/cs{CHUNK_SIZE}/{model_base}"),
+    retriever=retriever('/workspace/gym/vbot/faiss/cs2048/multi-qa-mpnet-base-cos-v1'),
     chain_type_kwargs=chain_type_kwargs
 )
 
 # Sidebar
 with st.sidebar:
-    st.title("VW ITP Bot")
-
     if st.sidebar.button("Clear message history"):
         msgs.clear()
         msgs.add_ai_message("How can I help you?")
