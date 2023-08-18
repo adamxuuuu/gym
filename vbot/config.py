@@ -10,6 +10,7 @@ SEPARATORS = '\n{1,}'       #   How the splitter split text, will still try to f
 # LLM Models
 LLM_13B = "/workspace/gym/vbot/models/llama-2-13b-chat.ggmlv3.q4_1.bin"   # Slow
 LLM_7B = "/workspace/gym/vbot/models/llama-2-7b-chat.ggmlv3.q8_0.bin"     # Fast
+LLM_7B_q4 = "/workspace/gym/vbot/models/llama-2-7b-chat.ggmlv3.q4_K_M.bin"
 
 # Text chunking
 CHUNK_SIZE = 2048           #  [64, 128, 256, 512, 1024, 2048]

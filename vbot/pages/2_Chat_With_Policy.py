@@ -4,8 +4,8 @@ from pprint import pprint
 from langchain import PromptTemplate
 from langchain.vectorstores import FAISS
 from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.chains import ConversationalRetrievalChain, RetrievalQA
-from langchain.llms import LlamaCpp, CTransformers
+from langchain.chains import RetrievalQA
+from langchain.llms import LlamaCpp
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
 from langchain.callbacks.base import BaseCallbackHandler
@@ -75,10 +75,7 @@ class PrintRetrievalHandler(BaseCallbackHandler):
 
 
 # ======================APP==========================
-# Setup memory for contextual conversation
 msgs = StreamlitChatMessageHistory()
-# memory = ConversationBufferMemory(
-#     memory_key="chat_history", chat_memory=msgs, return_messages=True)
 
 llm = LlamaCpp(
     model_path=LLM_7B,
@@ -88,19 +85,7 @@ llm = LlamaCpp(
     max_tokens=512
 )
 
-# llm = ChatOpenAI(
-#     model_name="gpt-3.5-turbo",
-#     openai_api_key=openai_api_key,
-#     temperature=0,
-#     max_tokens=256,
-#     model_kwargs={"presence_penalty": 1,
-#                   "frequency_penalty": 1,
-#                   "stop": ["\n", "\n\n", "###"]},
-#     streaming=True
-# )
-
 chain_type_kwargs = {"prompt": PROMPT}
-model_base = os.path.basename(EMBEDDING)
 qa_chain = RetrievalQA.from_chain_type(
     llm=llm,
     chain_type="stuff",
