@@ -19,3 +19,7 @@ secondaryBackgroundColor="#E7F8FF"
 # Font family for all text in the app, except code blocks. One of "sans serif",
 # "serif", or "monospace".
 # font =
+
+[server]
+# Default: 200
+maxUploadSize = 1
